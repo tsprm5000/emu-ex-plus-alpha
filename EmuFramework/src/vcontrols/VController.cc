@@ -703,6 +703,17 @@ bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 			}
 			return true;
 		}
+		case CFGKEY_VCONTROLLER_UI_ELEMENT_SIZES:
+{
+	auto n = io.get<uint8_t>();
+	for(auto i : iotaCount(n))
+	{
+		auto pct = io.get<uint8_t>();
+		if(i < uiElements.size() && pct >= 25 && pct <= 250)
+			uiElements[i].sizePct = pct;
+	}
+	return true;
+}
 		case CFGKEY_VCONTROLLER_ELEMENT_SIZES:
 {
 	auto n = io.get<uint8_t>();
@@ -818,17 +829,23 @@ void VController::writeUIButtonsConfig(FileIO &io) const
 	for(const auto &e : uiElements) { writeToConfig(e, io); }
 }
 
+static void writeSizeList(FileIO &io, int key, const std::vector<VControllerElement> &elems)
+{
+	if(std::ranges::all_of(elems, [](auto &e){ return e.sizePct == 100; }))
+		return;
+	auto n = uint8_t(std::min(elems.size(), 255zu));
+	io.put(uint16_t(2 + 1 + n));
+	io.put(uint16_t(key));
+	io.put(n);
+	for(auto i : iotaCount(n)) io.put(elems[i].sizePct);
+}
+
 void VController::writeElementSizesConfig(FileIO &io) const
 {
-	if(!perElementSizeEnabled ||
-		std::ranges::all_of(gpElements, [](auto &e){ return e.sizePct == 100; }))
-		return;
-	auto n = uint8_t(std::min(gpElements.size(), 255zu));
-	io.put(uint16_t(2 + 1 + n));
-	io.put(uint16_t(CFGKEY_VCONTROLLER_ELEMENT_SIZES));
-	io.put(n);
-	for(auto i : iotaCount(n)) io.put(gpElements[i].sizePct);
+	writeSizeList(io, CFGKEY_VCONTROLLER_ELEMENT_SIZES, gpElements);
+	writeSizeList(io, CFGKEY_VCONTROLLER_UI_ELEMENT_SIZES, uiElements);
 }
+
 void VController::writeConfig(FileIO &io) const
 {
 	if(buttonAlpha() != defaultAlpha)
@@ -845,8 +862,8 @@ void VController::writeConfig(FileIO &io) const
 		writeOptionValue(io, CFGKEY_VCONTROLLER_ALLOW_PAST_CONTENT_BOUNDS, true);
 	writeOptionValueIfNotDefault(io, CFGKEY_VCONTROLLER_HIGHLIGHT_PUSHED_BUTTONS, highlightPushedButtons, true);
 	writeDeviceButtonsConfig(io);
-	writeElementSizesConfig(io);
 	writeUIButtonsConfig(io);
+	writeElementSizesConfig(io);
 }
 
 void VController::configure(Window &win, Gfx::Renderer &renderer, const Gfx::GlyphTextureSet &face)

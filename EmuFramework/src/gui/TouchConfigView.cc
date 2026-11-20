@@ -718,7 +718,7 @@ private:
 		buttonItems.clear();
 		item.clear();
 		item.emplace_back(&state);
-		if(perElementSizeEnabled && !elem.uiButtonGroup()) item.emplace_back(&sizeScale);
+		item.emplace_back(&sizeScale);
 		if(elem.buttonGroup())
 		{
 			item.emplace_back(&space);
