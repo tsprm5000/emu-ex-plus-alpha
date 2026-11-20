@@ -59,6 +59,9 @@ jobs:
       shell: bash
     - name: Build environment
       run: |
+        mkdir -p $IMAGINE_PATH/build/android-arm64/gen
+        mkdir -p $EMUFRAMEWORK_PATH/build/android-arm64/gen
+        $IMAGINE_PATH/android.sh config
         $IMAGINE_PATH/android.sh config
         $IMAGINE_PATH/android.sh installLinks --config Release
         $EMUFRAMEWORK_PATH/android.sh config
