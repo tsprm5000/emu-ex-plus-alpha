@@ -702,18 +702,7 @@ bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 					return false;
 			}
 			return true;
-		}
-		case CFGKEY_VCONTROLLER_UI_ELEMENT_SIZES:
-{
-	auto n = io.get<uint8_t>();
-	for(auto i : iotaCount(n))
-	{
-		auto pct = io.get<uint8_t>();
-		if(i < uiElements.size() && pct >= 25 && pct <= 250)
-			uiElements[i].sizePct = pct;
-	}
-	return true;
-}
+		}	
 		case CFGKEY_VCONTROLLER_ELEMENT_SIZES:
 {
 	auto n = io.get<uint8_t>();
@@ -722,6 +711,17 @@ bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 		auto pct = io.get<uint8_t>();
 		if(i < gpElements.size() && pct >= 25 && pct <= 250)
 			gpElements[i].sizePct = pct;
+	}
+	return true;
+}
+		case CFGKEY_VCONTROLLER_UI_ELEMENT_SIZES:
+{
+	auto n = io.get<uint8_t>();
+	for(auto i : iotaCount(n))
+	{
+		auto pct = io.get<uint8_t>();
+		if(i < uiElements.size() && pct >= 25 && pct <= 250)
+			uiElements[i].sizePct = pct;
 	}
 	return true;
 }

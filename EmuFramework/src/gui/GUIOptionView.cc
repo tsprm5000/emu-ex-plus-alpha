@@ -23,6 +23,7 @@ namespace EmuEx
 static constexpr bool USE_MOBILE_ORIENTATION_NAMES = Config::envIsAndroid || Config::envIsIOS;
 static const char *landscapeName = USE_MOBILE_ORIENTATION_NAMES ? "Landscape" : "90° Left";
 static const char *landscape2Name = USE_MOBILE_ORIENTATION_NAMES ? "Landscape 2" : "90° Right";
+static const char *landscapeAutoName = USE_MOBILE_ORIENTATION_NAMES ? "Landscape Auto" : "Detect Automatically";
 static const char *portraitName = USE_MOBILE_ORIENTATION_NAMES ? "Portrait" : "Standard";
 static const char *portrait2Name = USE_MOBILE_ORIENTATION_NAMES ? "Portrait 2" : "Upside Down";
 
@@ -222,11 +223,12 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	menuOrientationItem
 	{
-		{"Auto",         attach, {.id = Orientations{}}},
-		{landscapeName,  attach, {.id = Orientations{.landscapeRight = 1}}},
-		{landscape2Name, attach, {.id = Orientations{.landscapeLeft = 1}}},
-		{portraitName,   attach, {.id = Orientations{.portrait = 1}}},
-		{portrait2Name,  attach, {.id = Orientations{.portraitUpsideDown = 1}}},
+		{"Auto",        	attach, {.id = Orientations{}}},
+		{landscapeName,  	attach, {.id = Orientations{.landscapeRight = 1}}},
+		{landscape2Name,	attach, {.id = Orientations{.landscapeLeft = 1}}},
+		{landscapeAutoName, 	attach, {.id = Orientations::allLandscape()}},
+		{portraitName,   	attach, {.id = Orientations{.portrait = 1}}},
+		{portrait2Name,  	attach, {.id = Orientations{.portraitUpsideDown = 1}}},
 	},
 	menuOrientation
 	{
@@ -239,11 +241,12 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	emuOrientationItem
 	{
-		{"Auto",         attach, {.id = Orientations{}}},
-		{landscapeName,  attach, {.id = Orientations{.landscapeRight = 1}}},
-		{landscape2Name, attach, {.id = Orientations{.landscapeLeft = 1}}},
-		{portraitName,   attach, {.id = Orientations{.portrait = 1}}},
-		{portrait2Name,  attach, {.id = Orientations{.portraitUpsideDown = 1}}},
+		{"Auto",       		attach, {.id = Orientations{}}},
+		{landscapeName,  	attach, {.id = Orientations{.landscapeRight = 1}}},
+		{landscape2Name, 	attach, {.id = Orientations{.landscapeLeft = 1}}},
+		{landscapeAutoName, 	attach, {.id = Orientations::allLandscape()}},
+		{portraitName,   	attach, {.id = Orientations{.portrait = 1}}},
+		{portrait2Name,  	attach, {.id = Orientations{.portraitUpsideDown = 1}}},
 	},
 	emuOrientation
 	{
