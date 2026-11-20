@@ -389,7 +389,7 @@ public:
 
 	std::array<VControllerLayoutPosition, 2> layoutPos;
 	VControllerState state{VControllerState::SHOWN};
-	uint8_t sizePct{100};
+	std::array<uint8_t, 2> sizePct{100, 100}; // [0] landscape, [1] portrait
 
 	constexpr auto dPad(this auto&& self) { return std::get_if<VControllerDPad>(&self); }
 	constexpr auto buttonGroup(this auto&& self) { return std::get_if<VControllerButtonGroup>(&self); }
@@ -586,6 +586,7 @@ public:
 	void resetInput();
 	void updateAltSpeedModeInput(AltSpeedMode, bool on);
 	void place();
+	bool isPortraitLayout() const;
 	void toggleKeyboard();
 	bool pointerInputEvent(const Input::MotionEvent &, WindowRect gameRect);
 	bool keyInput(const Input::KeyEvent &);

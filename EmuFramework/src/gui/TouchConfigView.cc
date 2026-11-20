@@ -195,7 +195,7 @@ public:
 			pushAndShowNewCollectValueRangeInputView<int, 25, 250>(attachParams(), e, "Input 25 to 250", "",
 				[this](CollectTextInputView &, auto val)
 				{
-					elem.sizePct = val;
+					elem.sizePct[vCtrl.isPortraitLayout()] = val;
 					vCtrl.place();
 					sizeScale.setSelected(MenuId{val}, *this);
 					dismissPrevious();
@@ -204,17 +204,18 @@ public:
 			return false;
 		}, {.id = defaultMenuId}},
 },
-sizeScale
+		sizeScale
 {
-	"Size Scale", attach, MenuId{elem.sizePct}, sizeScaleItems,
+	"Size Scale", attach, MenuId{elem.sizePct[vCtrl.isPortraitLayout()]}, sizeScaleItems,
 	{
 		.onSetDisplayString = [this](auto, Gfx::Text &t)
-			{ t.resetString(std::format("{}%", elem.sizePct)); return true; },
+			{ t.resetString(std::format("{}% ({})", elem.sizePct[vCtrl.isPortraitLayout()],
+				vCtrl.isPortraitLayout() ? "Portrait" : "Landscape")); return true; },
 		.defaultItemOnSelect = [this](TextMenuItem &item)
-			{ elem.sizePct = item.id.val; vCtrl.place(); }
+			{ elem.sizePct[vCtrl.isPortraitLayout()] = item.id.val; vCtrl.place(); }
 	},
 },
-		actionsHeading{"D-Pad Actions", attach},
+			actionsHeading{"D-Pad Actions", attach},
 		actions
 		{
 			{
@@ -433,7 +434,7 @@ public:
 			pushAndShowNewCollectValueRangeInputView<int, 25, 250>(attachParams(), e, "Input 25 to 250", "",
 				[this](CollectTextInputView &, auto val)
 				{
-					elem.sizePct = val;
+					elem.sizePct[vCtrl.isPortraitLayout()] = val;
 					vCtrl.place();
 					sizeScale.setSelected(MenuId{val}, *this);
 					dismissPrevious();
@@ -444,12 +445,13 @@ public:
 },
 sizeScale
 {
-	"Size Scale", attach, MenuId{elem.sizePct}, sizeScaleItems,
+	"Size Scale", attach, MenuId{elem.sizePct[vCtrl.isPortraitLayout()]}, sizeScaleItems,
 	{
 		.onSetDisplayString = [this](auto, Gfx::Text &t)
-			{ t.resetString(std::format("{}%", elem.sizePct)); return true; },
+			{ t.resetString(std::format("{}% ({})", elem.sizePct[vCtrl.isPortraitLayout()],
+				vCtrl.isPortraitLayout() ? "Portrait" : "Landscape")); return true; },
 		.defaultItemOnSelect = [this](TextMenuItem &item)
-			{ elem.sizePct = item.id.val; vCtrl.place(); }
+			{ elem.sizePct[vCtrl.isPortraitLayout()] = item.id.val; vCtrl.place(); }
 	},
 },
 		rowSizeItems

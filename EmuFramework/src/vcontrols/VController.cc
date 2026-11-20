@@ -112,11 +112,16 @@ void VController::updateTextures()
 	for(auto &e : uiElements) { updateTexture(app(), e, renderer().mainTask, fanQuadIdxs); }
 }
 
-static void setSize(VControllerElement &elem, int sizePx, Gfx::Renderer &r)
+bool VController::isPortraitLayout() const
+{
+	return hasWindow() && window().isPortrait();
+}
+static void setSize(VControllerElement &elem, int sizePx, Gfx::Renderer &r, bool portrait)
 {
 	assume(sizePx);
-	if(perElementSizeEnabled && elem.sizePct != 100)
-	sizePx = makeEvenRoundedUp(sizePx * elem.sizePct / 100);
+	auto pct = elem.sizePct[portrait];
+	if(pct != 100)
+	sizePx = makeEvenRoundedUp(sizePx * pct / 100);
 	elem.visit(overloaded
 	{
 		[&](VControllerDPad &dpad){ dpad.setSize(r, makeEvenRoundedUp(int(sizePx * 2.5f))); },
@@ -129,8 +134,9 @@ void VController::setButtonSizes(int gamepadBtnSizeInPixels, int uiBtnSizeInPixe
 {
 	if(AppMeta::inputHasKeyboard)
 		kb.place(gamepadBtnSizeInPixels, gamepadBtnSizeInPixels * .75f, layoutBounds());
-	for(auto &elem : gpElements) { setSize(elem, gamepadBtnSizeInPixels, renderer()); }
-	for(auto &elem : uiElements) { setSize(elem, uiBtnSizeInPixels, renderer()); }
+	bool portrait = isPortraitLayout();
+	for(auto &elem : gpElements) { setSize(elem, gamepadBtnSizeInPixels, renderer(), portrait); }
+	for(auto &elem : uiElements) { setSize(elem, uiBtnSizeInPixels, renderer(), portrait); }	
 }
 
 void VController::applyButtonSize()
@@ -668,6 +674,19 @@ static bool readVControllerElement(InputManager &mgr, MapIO &io, std::vector<VCo
 	return true;
 }
 
+static void readSizeList(MapIO &io, std::vector<VControllerElement> &elems)
+{
+	auto n = io.get<uint8_t>();
+	for(auto i : iotaCount(n))
+	{
+		auto land = io.get<uint8_t>();
+		auto port = io.get<uint8_t>();
+		if(i >= elems.size()) continue;
+		if(land >= 25 && land <= 250) elems[i].sizePct[0] = land;
+		if(port >= 25 && port <= 250) elems[i].sizePct[1] = port;
+	}
+}
+
 bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 {
 	switch(key)
@@ -703,29 +722,11 @@ bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 			}
 			return true;
 		}	
-		case CFGKEY_VCONTROLLER_ELEMENT_SIZES:
-{
-	auto n = io.get<uint8_t>();
-	for(auto i : iotaCount(n))
-	{
-		auto pct = io.get<uint8_t>();
-		if(i < gpElements.size() && pct >= 25 && pct <= 250)
-			gpElements[i].sizePct = pct;
-	}
-	return true;
-}
-		case CFGKEY_VCONTROLLER_UI_ELEMENT_SIZES:
-{
-	auto n = io.get<uint8_t>();
-	for(auto i : iotaCount(n))
-	{
-		auto pct = io.get<uint8_t>();
-		if(i < uiElements.size() && pct >= 25 && pct <= 250)
-			uiElements[i].sizePct = pct;
-	}
-	return true;
-}
-		case CFGKEY_VCONTROLLER_UI_BUTTONS_V2:
+	case CFGKEY_VCONTROLLER_ELEMENT_SIZES: readSizeList(io, gpElements); return true;
+
+	case CFGKEY_VCONTROLLER_UI_ELEMENT_SIZES: readSizeList(io, uiElements); return true;
+
+	case CFGKEY_VCONTROLLER_UI_BUTTONS_V2:
 		{
 			uiElements.clear();
 			[[maybe_unused]] auto configId = io.get<uint8_t>(); // reserved for future use
@@ -831,13 +832,13 @@ void VController::writeUIButtonsConfig(FileIO &io) const
 
 static void writeSizeList(FileIO &io, int key, const std::vector<VControllerElement> &elems)
 {
-	if(std::ranges::all_of(elems, [](auto &e){ return e.sizePct == 100; }))
+	if(std::ranges::all_of(elems, [](auto &e){ return e.sizePct[0] == 100 && e.sizePct[1] == 100; }))
 		return;
 	auto n = uint8_t(std::min(elems.size(), 255zu));
-	io.put(uint16_t(2 + 1 + n));
+	io.put(uint16_t(2 + 1 + n * 2));
 	io.put(uint16_t(key));
 	io.put(n);
-	for(auto i : iotaCount(n)) io.put(elems[i].sizePct);
+	for(auto i : iotaCount(n)) { io.put(elems[i].sizePct[0]); io.put(elems[i].sizePct[1]); }
 }
 
 void VController::writeElementSizesConfig(FileIO &io) const
@@ -1099,7 +1100,7 @@ void VController::update(VControllerElement &elem) const
 	if(!hasWindow())
 		return;
 	updateTexture(app(), elem, renderer_->mainTask, fanQuadIdxs);
-	setSize(elem, elem.uiButtonGroup() ? uiButtonPixelSize() : emulatedDeviceButtonPixelSize(), *renderer_);
+	setSize(elem, elem.uiButtonGroup() ? uiButtonPixelSize() : emulatedDeviceButtonPixelSize(), *renderer_, isPortraitLayout());	
 	elem.updateMeasurements(window());
 	elem.visit(overloaded
 	{
