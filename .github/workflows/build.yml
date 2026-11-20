@@ -102,6 +102,19 @@ jobs:
       run: |
         GITHUB_ENV_FILE=env.github
         cat "$GITHUB_ENV_FILE" >> $GITHUB_ENV
+    - name: Decode debug keystore
+      env:
+        DEBUG_KEYSTORE: ${{ secrets.DEBUG_KEYSTORE }}
+      run: |
+        if [ -n "$DEBUG_KEYSTORE" ]; then
+          mkdir -p ~/.android
+          echo "$DEBUG_KEYSTORE" | base64 --decode > ~/.android/debug.keystore
+        else
+          echo "NO DEBUG_KEYSTORE SECRET"
+        fi
+    - name: Check keystore
+      run: |
+        keytool -list -keystore ~/.android/debug.keystore -storepass android | grep -i "fingerprint"
     - name: Create EX-Emulators directory
       run: mkdir EX-Emulators
     - name: Build 2600.emu
