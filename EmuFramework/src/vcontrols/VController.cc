@@ -115,6 +115,8 @@ void VController::updateTextures()
 static void setSize(VControllerElement &elem, int sizePx, Gfx::Renderer &r)
 {
 	assume(sizePx);
+	if(perElementSizeEnabled)
+	sizePx = makeEvenRoundedUp(sizePx * elem.sizePct / 100);
 	elem.visit(overloaded
 	{
 		[&](VControllerDPad &dpad){ dpad.setSize(r, makeEvenRoundedUp(int(sizePx * 2.5f))); },
@@ -701,6 +703,17 @@ bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 			}
 			return true;
 		}
+		case CFGKEY_VCONTROLLER_ELEMENT_SIZES:
+{
+	auto n = io.get<uint8_t>();
+	for(auto i : iotaCount(n))
+	{
+		auto pct = io.get<uint8_t>();
+		if(i < gpElements.size() && pct >= 25 && pct <= 250)
+			gpElements[i].sizePct = pct;
+	}
+	return true;
+}
 		case CFGKEY_VCONTROLLER_UI_BUTTONS_V2:
 		{
 			uiElements.clear();
@@ -805,6 +818,17 @@ void VController::writeUIButtonsConfig(FileIO &io) const
 	for(const auto &e : uiElements) { writeToConfig(e, io); }
 }
 
+void VController::writeElementSizesConfig(FileIO &io) const
+{
+	if(!perElementSizeEnabled ||
+		std::ranges::all_of(gpElements, [](auto &e){ return e.sizePct == 100; }))
+		return;
+	auto n = uint8_t(std::min(gpElements.size(), 255zu));
+	io.put(uint16_t(2 + 1 + n));
+	io.put(uint16_t(CFGKEY_VCONTROLLER_ELEMENT_SIZES));
+	io.put(n);
+	for(auto i : iotaCount(n)) io.put(gpElements[i].sizePct);
+}
 void VController::writeConfig(FileIO &io) const
 {
 	if(buttonAlpha() != defaultAlpha)
@@ -821,6 +845,7 @@ void VController::writeConfig(FileIO &io) const
 		writeOptionValue(io, CFGKEY_VCONTROLLER_ALLOW_PAST_CONTENT_BOUNDS, true);
 	writeOptionValueIfNotDefault(io, CFGKEY_VCONTROLLER_HIGHLIGHT_PUSHED_BUTTONS, highlightPushedButtons, true);
 	writeDeviceButtonsConfig(io);
+	writeElementSizesConfig(io);
 	writeUIButtonsConfig(io);
 }
 

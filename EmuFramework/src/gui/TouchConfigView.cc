@@ -185,6 +185,35 @@ public:
 					}), e);
 			}
 		},
+		sizeScaleItems
+{
+	{"50%", attach, {.id = 50}}, {"75%", attach, {.id = 75}},
+	{"100%", attach, {.id = 100}}, {"125%", attach, {.id = 125}},
+	{"150%", attach, {.id = 150}}, {"200%", attach, {.id = 200}},
+	{"Custom Value", attach, [this](const Input::Event &e)
+		{
+			pushAndShowNewCollectValueRangeInputView<int, 25, 250>(attachParams(), e, "Input 25 to 250", "",
+				[this](CollectTextInputView &, auto val)
+				{
+					elem.sizePct = val;
+					vCtrl.place();
+					sizeScale.setSelected(MenuId{val}, *this);
+					dismissPrevious();
+					return true;
+				});
+			return false;
+		}, {.id = defaultMenuId}},
+},
+sizeScale
+{
+	"Size Scale", attach, MenuId{elem.sizePct}, sizeScaleItems,
+	{
+		.onSetDisplayString = [this](auto, Gfx::Text &t)
+			{ t.resetString(std::format("{}%", elem.sizePct)); return true; },
+		.defaultItemOnSelect = [this](TextMenuItem &item)
+			{ elem.sizePct = item.id.val; vCtrl.place(); }
+	},
+},
 		actionsHeading{"D-Pad Actions", attach},
 		actions
 		{
@@ -229,9 +258,11 @@ private:
 	MultiChoiceMenuItem state;
 	BoolMenuItem showBoundingArea;
 	TextMenuItem remove;
+	TextMenuItem sizeScaleItems[7];
+	MultiChoiceMenuItem sizeScale;
 	TextHeadingMenuItem actionsHeading;
 	DualTextMenuItem actions[4];
-	std::array<MenuItem*, 10> item{&state, &deadzone, &diagonalSensitivity, &showBoundingArea, &remove,
+	std::array<MenuItem*, 11> item{&state, &sizeScale, &deadzone, &diagonalSensitivity, &showBoundingArea, &remove,
 		&actionsHeading, &actions[0], &actions[1], &actions[2], &actions[3]};
 
 	void assignAction(int idx, const Input::Event &e)
@@ -392,6 +423,35 @@ public:
 				}
 			},
 		},
+		sizeScaleItems
+{
+	{"50%", attach, {.id = 50}}, {"75%", attach, {.id = 75}},
+	{"100%", attach, {.id = 100}}, {"125%", attach, {.id = 125}},
+	{"150%", attach, {.id = 150}}, {"200%", attach, {.id = 200}},
+	{"Custom Value", attach, [this](const Input::Event &e)
+		{
+			pushAndShowNewCollectValueRangeInputView<int, 25, 250>(attachParams(), e, "Input 25 to 250", "",
+				[this](CollectTextInputView &, auto val)
+				{
+					elem.sizePct = val;
+					vCtrl.place();
+					sizeScale.setSelected(MenuId{val}, *this);
+					dismissPrevious();
+					return true;
+				});
+			return false;
+		}, {.id = defaultMenuId}},
+},
+sizeScale
+{
+	"Size Scale", attach, MenuId{elem.sizePct}, sizeScaleItems,
+	{
+		.onSetDisplayString = [this](auto, Gfx::Text &t)
+			{ t.resetString(std::format("{}%", elem.sizePct)); return true; },
+		.defaultItemOnSelect = [this](TextMenuItem &item)
+			{ elem.sizePct = item.id.val; vCtrl.place(); }
+	},
+},
 		rowSizeItems
 		{
 			{"1", attach, {.id = 1}},
@@ -634,6 +694,8 @@ private:
 	TouchConfigView &confView;
 	TextMenuItem stateItems[3];
 	MultiChoiceMenuItem state;
+	TextMenuItem sizeScaleItems[7];
+	MultiChoiceMenuItem sizeScale;
 	TextMenuItem rowSizeItems[5];
 	MultiChoiceMenuItem rowSize;
 	TextMenuItem spaceItems[5];
@@ -656,6 +718,7 @@ private:
 		buttonItems.clear();
 		item.clear();
 		item.emplace_back(&state);
+		if(perElementSizeEnabled && !elem.uiButtonGroup()) item.emplace_back(&sizeScale);
 		if(elem.buttonGroup())
 		{
 			item.emplace_back(&space);

@@ -379,6 +379,7 @@ public:
 };
 
 using VControllerElementVariant = std::variant<VControllerButtonGroup, VControllerUIButtonGroup, VControllerDPad>;
+inline constexpr bool perElementSizeEnabled = true; // TEST MODE, gated later
 
 class VControllerElement : public VControllerElementVariant, public AddVisit
 {
@@ -388,6 +389,7 @@ public:
 
 	std::array<VControllerLayoutPosition, 2> layoutPos;
 	VControllerState state{VControllerState::SHOWN};
+	uint8_t sizePct{100};
 
 	constexpr auto dPad(this auto&& self) { return std::get_if<VControllerDPad>(&self); }
 	constexpr auto buttonGroup(this auto&& self) { return std::get_if<VControllerButtonGroup>(&self); }
@@ -689,6 +691,7 @@ private:
 	int uiButtonPixelSize() const;
 	void writeDeviceButtonsConfig(FileIO &) const;
 	void writeUIButtonsConfig(FileIO &) const;
+	void writeElementSizesConfig(FileIO &) const;
 };
 
 }
