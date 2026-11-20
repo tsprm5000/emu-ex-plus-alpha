@@ -112,9 +112,6 @@ jobs:
         else
           echo "NO DEBUG_KEYSTORE SECRET"
         fi
-    - name: Check keystore
-      run: |
-        keytool -list -keystore ~/.android/debug.keystore -storepass android | grep -i "fingerprint"
     - name: Create EX-Emulators directory
       run: mkdir EX-Emulators
     - name: Build 2600.emu
