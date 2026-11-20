@@ -115,7 +115,7 @@ void VController::updateTextures()
 static void setSize(VControllerElement &elem, int sizePx, Gfx::Renderer &r)
 {
 	assume(sizePx);
-	if(perElementSizeEnabled)
+	if(perElementSizeEnabled && elem.sizePct != 100)
 	sizePx = makeEvenRoundedUp(sizePx * elem.sizePct / 100);
 	elem.visit(overloaded
 	{
