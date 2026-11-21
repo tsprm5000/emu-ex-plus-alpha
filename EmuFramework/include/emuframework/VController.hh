@@ -390,6 +390,8 @@ public:
 	std::array<VControllerLayoutPosition, 2> layoutPos;
 	VControllerState state{VControllerState::SHOWN};
 	std::array<uint8_t, 2> sizePct{100, 100}; // [0] landscape, [1] portrait
+	uint8_t alphaPct{100}; // % of global opacity, 0-200
+	float scaledAlpha(float a) const { return std::min(1.f, a * alphaPct / 100.f); }
 
 	constexpr auto dPad(this auto&& self) { return std::get_if<VControllerDPad>(&self); }
 	constexpr auto buttonGroup(this auto&& self) { return std::get_if<VControllerButtonGroup>(&self); }
@@ -405,7 +407,7 @@ public:
 	WRect bounds() const { return visit([](auto &e){ return e.bounds(); }); }
 	WRect realBounds() const { return visit([](auto &e){ return e.realBounds(); }); }
 	void setPos(WPt pos, WRect viewBounds) { visit([&](auto &e){ e.setPos(pos, viewBounds); }); }
-	void setAlpha(float alpha) { visit([&](auto &e){ e.setAlpha(alpha); }); }
+	void setAlpha(float alpha) { visit([&](auto &e){ e.setAlpha(scaledAlpha(alpha)); }); }
 
 	static bool shouldDraw(VControllerState state, bool showHidden)
 	{
@@ -693,6 +695,7 @@ private:
 	void writeDeviceButtonsConfig(FileIO &) const;
 	void writeUIButtonsConfig(FileIO &) const;
 	void writeElementSizesConfig(FileIO &) const;
+	void writeElementAlphasConfig(FileIO &) const;
 };
 
 }

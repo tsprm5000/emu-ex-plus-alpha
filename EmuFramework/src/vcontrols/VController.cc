@@ -165,11 +165,11 @@ void VController::updateAltSpeedModeInput(AltSpeedMode mode, bool on)
 		{
 			if(b.key.codes[0] == KeyCode(AppKeyCode::fastForward) || b.key.codes[0] == KeyCode(AppKeyCode::toggleFastForward))
 			{
-				b.updateColor(on && mode == AltSpeedMode::fast ? Gfx::Color{Gfx::ColorName::RED} : Gfx::Color{}, alphaF, e);
+				b.updateColor(on && mode == AltSpeedMode::fast ? Gfx::Color{Gfx::ColorName::RED} : Gfx::Color{}, e.scaledAlpha(alphaF), e);
 			}
 			else if(b.key.codes[0] == KeyCode(AppKeyCode::slowMotion) || b.key.codes[0] == KeyCode(AppKeyCode::toggleSlowMotion))
 			{
-				b.updateColor(on && mode == AltSpeedMode::slow ? Gfx::Color{Gfx::ColorName::RED} : Gfx::Color{}, alphaF, e);
+				b.updateColor(on && mode == AltSpeedMode::slow ? Gfx::Color{Gfx::ColorName::RED} : Gfx::Color{}, e.scaledAlpha(alphaF), e);
 			}
 		}
 	}
@@ -687,6 +687,16 @@ static void readSizeList(MapIO &io, std::vector<VControllerElement> &elems)
 	}
 }
 
+static void readAlphaList(MapIO &io, std::vector<VControllerElement> &elems)
+{
+	auto n = io.get<uint8_t>();
+	for(auto i : iotaCount(n))
+	{
+		auto pct = io.get<uint8_t>();
+		if(i < elems.size() && pct <= 200) elems[i].alphaPct = pct;
+	}
+}
+
 bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 {
 	switch(key)
@@ -723,9 +733,9 @@ bool VController::readConfig(EmuApp &app, MapIO &io, unsigned key)
 			return true;
 		}	
 	case CFGKEY_VCONTROLLER_ELEMENT_SIZES: readSizeList(io, gpElements); return true;
-
 	case CFGKEY_VCONTROLLER_UI_ELEMENT_SIZES: readSizeList(io, uiElements); return true;
-
+	case CFGKEY_VCONTROLLER_ELEMENT_ALPHAS: readAlphaList(io, gpElements); return true;
+	case CFGKEY_VCONTROLLER_UI_ELEMENT_ALPHAS: readAlphaList(io, uiElements); return true;
 	case CFGKEY_VCONTROLLER_UI_BUTTONS_V2:
 		{
 			uiElements.clear();
@@ -841,6 +851,23 @@ static void writeSizeList(FileIO &io, int key, const std::vector<VControllerElem
 	for(auto i : iotaCount(n)) { io.put(elems[i].sizePct[0]); io.put(elems[i].sizePct[1]); }
 }
 
+static void writeAlphaList(FileIO &io, int key, const std::vector<VControllerElement> &elems)
+{
+	if(std::ranges::all_of(elems, [](auto &e){ return e.alphaPct == 100; }))
+		return;
+	auto n = uint8_t(std::min(elems.size(), 255zu));
+	io.put(uint16_t(2 + 1 + n));
+	io.put(uint16_t(key));
+	io.put(n);
+	for(auto i : iotaCount(n)) io.put(elems[i].alphaPct);
+}
+
+void VController::writeElementAlphasConfig(FileIO &io) const
+{
+	writeAlphaList(io, CFGKEY_VCONTROLLER_ELEMENT_ALPHAS, gpElements);
+	writeAlphaList(io, CFGKEY_VCONTROLLER_UI_ELEMENT_ALPHAS, uiElements);
+}
+
 void VController::writeElementSizesConfig(FileIO &io) const
 {
 	writeSizeList(io, CFGKEY_VCONTROLLER_ELEMENT_SIZES, gpElements);
@@ -865,6 +892,7 @@ void VController::writeConfig(FileIO &io) const
 	writeDeviceButtonsConfig(io);
 	writeUIButtonsConfig(io);
 	writeElementSizesConfig(io);
+	writeElementAlphasConfig(io);
 }
 
 void VController::configure(Window &win, Gfx::Renderer &renderer, const Gfx::GlyphTextureSet &face)
@@ -1142,7 +1170,7 @@ void VController::updateSystemKeys(KeyInfo key, bool isPushed)
 					if(stripFlags(btn.key) == key)
 					{
 						btn.isHighlighted = isPushed;
-						btn.setAlpha(alphaF, grp);
+						btn.setAlpha(e.scaledAlpha(alphaF), grp);
 					}
 				}
 			},
@@ -1158,7 +1186,7 @@ void VController::updateSystemKeys(KeyInfo key, bool isPushed)
 					}
 				}
 				if(didUpdate)
-					dpad.setAlpha(alphaF);
+					dpad.setAlpha(e.scaledAlpha(alphaF));
 			},
 			[](auto&){}
 		});
@@ -1178,7 +1206,7 @@ void VController::resetHighlightedKeys()
 					if(btn.isHighlighted)
 					{
 						btn.isHighlighted = false;
-						btn.setAlpha(alphaF, grp);
+						btn.setAlpha(e.scaledAlpha(alphaF), grp);
 					}
 				}
 			},

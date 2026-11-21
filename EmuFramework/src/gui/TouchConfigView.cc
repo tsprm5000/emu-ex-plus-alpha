@@ -215,6 +215,35 @@ public:
 			{ elem.sizePct[vCtrl.isPortraitLayout()] = item.id.val; vCtrl.place(); }
 	},
 },
+		opacityScaleItems
+{
+	{"25%", attach, {.id = 25}}, {"50%", attach, {.id = 50}},
+	{"100%", attach, {.id = 100}}, {"150%", attach, {.id = 150}},
+	{"200%", attach, {.id = 200}},
+	{"Custom Value", attach, [this](const Input::Event &e)
+		{
+			pushAndShowNewCollectValueRangeInputView<int, 0, 200>(attachParams(), e, "Input 0 to 200", "",
+				[this](CollectTextInputView &, auto val)
+				{
+					elem.alphaPct = val;
+					vCtrl.applySavedButtonAlpha();
+					opacityScale.setSelected(MenuId{val}, *this);
+					dismissPrevious();
+					return true;
+				});
+			return false;
+		}, {.id = defaultMenuId}},
+},
+		opacityScale
+{
+	"Opacity (% of global)", attach, MenuId{elem.alphaPct}, opacityScaleItems,
+	{
+		.onSetDisplayString = [this](auto, Gfx::Text &t)
+			{ t.resetString(std::format("{}%", elem.alphaPct)); return true; },
+		.defaultItemOnSelect = [this](TextMenuItem &item)
+			{ elem.alphaPct = item.id.val; vCtrl.applySavedButtonAlpha(); }
+	},
+},
 			actionsHeading{"D-Pad Actions", attach},
 		actions
 		{
@@ -261,9 +290,11 @@ private:
 	TextMenuItem remove;
 	TextMenuItem sizeScaleItems[7];
 	MultiChoiceMenuItem sizeScale;
+	TextMenuItem opacityScaleItems[6];
+	MultiChoiceMenuItem opacityScale;
 	TextHeadingMenuItem actionsHeading;
 	DualTextMenuItem actions[4];
-	std::array<MenuItem*, 11> item{&state, &sizeScale, &deadzone, &diagonalSensitivity, &showBoundingArea, &remove,
+	std::array<MenuItem*, 12> item{&state, &sizeScale, &opacityScale, &deadzone, &diagonalSensitivity, &showBoundingArea, &remove,
 		&actionsHeading, &actions[0], &actions[1], &actions[2], &actions[3]};
 
 	void assignAction(int idx, const Input::Event &e)
@@ -443,7 +474,7 @@ public:
 			return false;
 		}, {.id = defaultMenuId}},
 },
-sizeScale
+		sizeScale
 {
 	"Size Scale", attach, MenuId{elem.sizePct[vCtrl.isPortraitLayout()]}, sizeScaleItems,
 	{
@@ -452,6 +483,35 @@ sizeScale
 				vCtrl.isPortraitLayout() ? "Portrait" : "Landscape")); return true; },
 		.defaultItemOnSelect = [this](TextMenuItem &item)
 			{ elem.sizePct[vCtrl.isPortraitLayout()] = item.id.val; vCtrl.place(); }
+	},
+},
+		opacityScaleItems
+{
+	{"25%", attach, {.id = 25}}, {"50%", attach, {.id = 50}},
+	{"100%", attach, {.id = 100}}, {"150%", attach, {.id = 150}},
+	{"200%", attach, {.id = 200}},
+	{"Custom Value", attach, [this](const Input::Event &e)
+		{
+			pushAndShowNewCollectValueRangeInputView<int, 0, 200>(attachParams(), e, "Input 0 to 200", "",
+				[this](CollectTextInputView &, auto val)
+				{
+					elem.alphaPct = val;
+					vCtrl.applySavedButtonAlpha();
+					opacityScale.setSelected(MenuId{val}, *this);
+					dismissPrevious();
+					return true;
+				});
+			return false;
+		}, {.id = defaultMenuId}},
+},
+		opacityScale
+{
+	"Opacity (% of global)", attach, MenuId{elem.alphaPct}, opacityScaleItems,
+	{
+		.onSetDisplayString = [this](auto, Gfx::Text &t)
+			{ t.resetString(std::format("{}%", elem.alphaPct)); return true; },
+		.defaultItemOnSelect = [this](TextMenuItem &item)
+			{ elem.alphaPct = item.id.val; vCtrl.applySavedButtonAlpha(); }
 	},
 },
 		rowSizeItems
@@ -698,6 +758,8 @@ private:
 	MultiChoiceMenuItem state;
 	TextMenuItem sizeScaleItems[7];
 	MultiChoiceMenuItem sizeScale;
+	TextMenuItem opacityScaleItems[6];
+	MultiChoiceMenuItem opacityScale;
 	TextMenuItem rowSizeItems[5];
 	MultiChoiceMenuItem rowSize;
 	TextMenuItem spaceItems[5];
@@ -721,6 +783,7 @@ private:
 		item.clear();
 		item.emplace_back(&state);
 		item.emplace_back(&sizeScale);
+		item.emplace_back(&opacityScale);
 		if(elem.buttonGroup())
 		{
 			item.emplace_back(&space);
