@@ -867,7 +867,7 @@ class LayoutSlotView : public TableView, public EmuAppHelper
 				bool exists = vControllerLayoutExists(app(), slot);
 				slots.emplace_back(
 						std::format("Slot {}: {}", slot, exists ? "Saved" : "Empty"), attach,
-						[this, slot, exists](const Input::Event &e) { onSlot(slot, exists, e); });
+						[this, slot](const Input::Event &e) { onSlot(slot, e); });
 			}
 		}
 
@@ -877,8 +877,9 @@ class LayoutSlotView : public TableView, public EmuAppHelper
 		Mode mode;
 		std::vector<TextMenuItem> slots;
 
-		void onSlot(int slot, bool exists, const Input::Event &e)
+		void onSlot(int slot, const Input::Event &e)
 		{
+			bool exists = vControllerLayoutExists(app(), slot);
 			switch(mode)
 			{
 				case Mode::Save:
