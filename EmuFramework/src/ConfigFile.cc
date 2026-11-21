@@ -264,5 +264,61 @@ void EmuApp::saveConfigFile(ApplicationContext ctx)
 		log.error("error writing config file");
 	}
 }
+static auto layoutFilePath(EmuApp &app, int slot)
+{
+	static constexpr const char *names[maxLayoutSlots]
+	{
+		"layout1.cfg", "layout2.cfg", "layout3.cfg", "layout4.cfg",
+		"layout5.cfg", "layout6.cfg", "layout7.cfg", "layout8.cfg",
+	};
+	return FS::pathString(app.appContext().supportPath(), names[slot - 1]);
+}
+
+bool vControllerLayoutExists(EmuApp &app, int slot)
+{
+	return FS::exists(layoutFilePath(app, slot));
+}
+
+bool saveVControllerLayout(EmuApp &app, VController &vc, int slot)
+{
+	try
+	{
+		FileIO file{layoutFilePath(app, slot), OpenFlags::newFile()};
+		writeConfigHeader(file);
+		vc.writeLayoutConfig(file);
+		return true;
+	}
+	catch(...)
+	{
+		log.error("error writing layout file");
+		return false;
+	}
+}
+
+bool loadVControllerLayout(EmuApp &app, VController &vc, int slot)
+{
+	auto path = layoutFilePath(app, slot);
+	if(!FS::exists(path))
+		return false;
+	bool loaded{};
+	readConfigKeys(FileUtils::bufferFromPath(path, {.test = true}),
+		[&](auto key, auto &io) -> bool
+		{
+			if(!vc.readConfig(app, io, key))
+				return false;
+			loaded = true;
+			return true;
+		});
+	if(!loaded)
+		return false;
+	vc.place();
+	vc.applySavedButtonAlpha();
+	return true;
+}
+
+void deleteVControllerLayout(EmuApp &app, int slot)
+{
+	FS::remove(layoutFilePath(app, slot));
+}
 
 }

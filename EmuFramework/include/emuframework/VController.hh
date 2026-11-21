@@ -589,6 +589,7 @@ public:
 	void updateAltSpeedModeInput(AltSpeedMode, bool on);
 	void place();
 	bool isPortraitLayout() const;
+	void writeLayoutConfig(FileIO &) const;
 	void toggleKeyboard();
 	bool pointerInputEvent(const Input::MotionEvent &, WindowRect gameRect);
 	bool keyInput(const Input::KeyEvent &);
@@ -697,5 +698,10 @@ private:
 	void writeElementSizesConfig(FileIO &) const;
 	void writeElementAlphasConfig(FileIO &) const;
 };
+constexpr int maxLayoutSlots = 8;
+bool vControllerLayoutExists(EmuApp &, int slot);
+bool saveVControllerLayout(EmuApp &, VController &, int slot);
+bool loadVControllerLayout(EmuApp &, VController &, int slot);
+void deleteVControllerLayout(EmuApp &, int slot);
 
 }

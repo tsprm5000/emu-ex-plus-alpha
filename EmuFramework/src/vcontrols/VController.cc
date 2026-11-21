@@ -868,6 +868,14 @@ void VController::writeElementAlphasConfig(FileIO &io) const
 	writeAlphaList(io, CFGKEY_VCONTROLLER_UI_ELEMENT_ALPHAS, uiElements);
 }
 
+void VController::writeLayoutConfig(FileIO &io) const
+{
+	writeDeviceButtonsConfig(io);
+	writeUIButtonsConfig(io);
+	writeElementSizesConfig(io);
+	writeElementAlphasConfig(io);
+}
+
 void VController::writeElementSizesConfig(FileIO &io) const
 {
 	writeSizeList(io, CFGKEY_VCONTROLLER_ELEMENT_SIZES, gpElements);

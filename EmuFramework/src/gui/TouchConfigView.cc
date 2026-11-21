@@ -851,6 +851,76 @@ private:
 	}
 };
 
+class LayoutSlotView : public TableView, public EmuAppHelper
+{
+	public:
+		enum class Mode { Save, Load, Remove };
+
+		LayoutSlotView(ViewAttachParams attach, TouchConfigView &confView_, VController &vCtrl_, Mode mode_):
+			TableView{mode_ == Mode::Save ? "Save Layout To" : mode_ == Mode::Load ? "Load Layout From" : "Delete Layout", attach, slots},
+			vCtrl{vCtrl_},
+			confView{confView_},
+			mode{mode_}
+		{
+			for(int slot = 1; slot <= maxLayoutSlots; slot++)
+			{
+				bool exists = vControllerLayoutExists(app(), slot);
+				slots.emplace_back(
+						std::format("Slot {}: {}", slot, exists ? "Saved" : "Empty"), attach,
+						[this, slot, exists](const Input::Event &e) { onSlot(slot, exists, e); });
+			}
+		}
+
+	private:
+		VController &vCtrl;
+		TouchConfigView &confView;
+		Mode mode;
+		std::vector<TextMenuItem> slots;
+
+		void onSlot(int slot, bool exists, const Input::Event &e)
+		{
+			switch(mode)
+			{
+				case Mode::Save:
+					if(!exists)
+					{
+						doSave(slot);
+						return;
+					}
+					pushAndShowModal(makeView<YesNoAlertView>("Overwrite this slot?",
+								YesNoAlertView::Delegates{ .onYes = [this, slot]{ doSave(slot); } }), e);
+					return;
+				case Mode::Load:
+					if(!exists)
+						return;
+					pushAndShowModal(makeView<YesNoAlertView>("Replace the current layout?",
+								YesNoAlertView::Delegates{ .onYes = [this, slot]
+								{
+								loadVControllerLayout(app(), vCtrl, slot);
+								confView.reloadItems();
+								dismiss();
+								} }), e);
+					return;
+				case Mode::Remove:
+					if(!exists)
+						return;
+					pushAndShowModal(makeView<YesNoAlertView>("Delete this layout?",
+								YesNoAlertView::Delegates{ .onYes = [this, slot]
+								{
+								deleteVControllerLayout(app(), slot);
+								dismiss();
+								} }), e);
+					return;
+			}
+		}
+
+		void doSave(int slot)
+		{
+			saveVControllerLayout(app(), vCtrl, slot);
+			dismiss();
+		}
+};
+
 void TouchConfigView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawParams) const
 {
 	vController.draw(cmds, true);
@@ -1031,6 +1101,30 @@ TouchConfigView::TouchConfigView(ViewAttachParams attach, VController &vCtrl):
 			pushAndShow(makeView<AddNewButtonView>(*this, vController), e);
 		}
 	},
+	layoutSave
+	{
+		"Save Layout...", attach,
+		[this](const Input::Event &e)
+		{
+			pushAndShow(makeView<LayoutSlotView>(*this, vController, LayoutSlotView::Mode::Save), e);
+		}
+	},
+	layoutLoad
+	{
+		"Load Layout...", attach,
+		[this](const Input::Event &e)
+		{
+			pushAndShow(makeView<LayoutSlotView>(*this, vController, LayoutSlotView::Mode::Load), e);
+		}
+	},
+	layoutDelete
+	{
+		"Delete Layout...", attach,
+		[this](const Input::Event &e)
+		{
+			pushAndShow(makeView<LayoutSlotView>(*this, vController, LayoutSlotView::Mode::Remove), e);
+		}
+	},
 	allowButtonsPastContentBounds
 	{
 		"Allow Buttons In Display Cutout Area", attach,
@@ -1170,6 +1264,9 @@ void TouchConfigView::reloadItems()
 	}
 	item.emplace_back(&otherHeading);
 	item.emplace_back(&addButton);
+	item.emplace_back(&layoutSave);
+	item.emplace_back(&layoutLoad);
+	item.emplace_back(&layoutDelete);
 	if(used(allowButtonsPastContentBounds) && appContext().hasDisplayCutout())
 	{
 		item.emplace_back(&allowButtonsPastContentBounds);
