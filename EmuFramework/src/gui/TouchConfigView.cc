@@ -217,12 +217,12 @@ public:
 },
 		opacityScaleItems
 {
-	{"25%", attach, {.id = 25}}, {"50%", attach, {.id = 50}},
-	{"100%", attach, {.id = 100}}, {"150%", attach, {.id = 150}},
-	{"200%", attach, {.id = 200}},
+	{"0%", attach, {.id = 0}}, {"25%", attach, {.id = 25}},
+	{"50%", attach, {.id = 50}}, {"75%", attach, {.id = 75}},
+	{"100%", attach, {.id = 100}},,
 	{"Custom Value", attach, [this](const Input::Event &e)
 		{
-			pushAndShowNewCollectValueRangeInputView<int, 0, 200>(attachParams(), e, "Input 0 to 200", "",
+			pushAndShowNewCollectValueRangeInputView<int, 0, 100>(attachParams(), e, "Input 0 to 100", "",
 				[this](CollectTextInputView &, auto val)
 				{
 					elem.alphaPct = val;
@@ -236,7 +236,7 @@ public:
 },
 		opacityScale
 {
-	"Opacity (% of global)", attach, MenuId{elem.alphaPct}, opacityScaleItems,
+	"Opacity (% of Blend Amount)", attach, MenuId{elem.alphaPct}, opacityScaleItems,
 	{
 		.onSetDisplayString = [this](auto, Gfx::Text &t)
 			{ t.resetString(std::format("{}%", elem.alphaPct)); return true; },
@@ -487,34 +487,34 @@ public:
 },
 		opacityScaleItems
 {
-	{"25%", attach, {.id = 25}}, {"50%", attach, {.id = 50}},
-	{"100%", attach, {.id = 100}}, {"150%", attach, {.id = 150}},
-	{"200%", attach, {.id = 200}},
-	{"Custom Value", attach, [this](const Input::Event &e)
+	{"0%", attach, {.id = 0}}, {"25%", attach, {.id = 25}},
+	{"50%", attach, {.id = 50}}, {"75%", attach, {.id = 75}},
+	{"100%", attach, {.id = 100}},
+	{"custom value", attach, [this](const input::event &e)
 		{
-			pushAndShowNewCollectValueRangeInputView<int, 0, 200>(attachParams(), e, "Input 0 to 200", "",
-				[this](CollectTextInputView &, auto val)
+			pushandshownewcollectvaluerangeinputview<int, 0, 100>(attachparams(), e, "input 0 to 100", "",
+				[this](collecttextinputview &, auto val)
 				{
-					elem.alphaPct = val;
-					vCtrl.applySavedButtonAlpha();
-					opacityScale.setSelected(MenuId{val}, *this);
-					dismissPrevious();
+					elem.alphapct = val;
+					vctrl.applysavedbuttonalpha();
+					opacityscale.setselected(menuid{val}, *this);
+					dismissprevious();
 					return true;
 				});
 			return false;
-		}, {.id = defaultMenuId}},
+		}, {.id = defaultmenuid}},
 },
-		opacityScale
+		opacityscale
 {
-	"Opacity (% of global)", attach, MenuId{elem.alphaPct}, opacityScaleItems,
+	"Opacity (% of Blend Amount)", attach, menuid{elem.alphapct}, opacityscaleitems,
 	{
-		.onSetDisplayString = [this](auto, Gfx::Text &t)
-			{ t.resetString(std::format("{}%", elem.alphaPct)); return true; },
-		.defaultItemOnSelect = [this](TextMenuItem &item)
-			{ elem.alphaPct = item.id.val; vCtrl.applySavedButtonAlpha(); }
+		.onsetdisplaystring = [this](auto, gfx::text &t)
+			{ t.resetstring(std::format("{}%", elem.alphapct)); return true; },
+		.defaultitemonselect = [this](textmenuitem &item)
+			{ elem.alphapct = item.id.val; vctrl.applysavedbuttonalpha(); }
 	},
 },
-		rowSizeItems
+		rowsizeitems
 		{
 			{"1", attach, {.id = 1}},
 			{"2", attach, {.id = 2}},
@@ -522,45 +522,45 @@ public:
 			{"4", attach, {.id = 4}},
 			{"5", attach, {.id = 5}},
 		},
-		rowSize
+		rowsize
 		{
-			"Buttons Per Row", attach,
-			MenuId{elem.rowSize()},
-			rowSizeItems,
+			"buttons per row", attach,
+			menuid{elem.rowsize()},
+			rowsizeitems,
 			{
-				.defaultItemOnSelect = [this](TextMenuItem &item)
+				.defaultitemonselect = [this](textmenuitem &item)
 				{
-					elem.setRowSize(item.id);
-					vCtrl.place();
+					elem.setrowsize(item.id);
+					vctrl.place();
 				}
 			},
 		},
-		spaceItems
+		spaceitems
 		{
 			{"1mm", attach, {.id = 1}},
 			{"2mm", attach, {.id = 2}},
 			{"3mm", attach, {.id = 3}},
 			{"4mm", attach, {.id = 4}},
-			{"Custom Value", attach,
-				[this](const Input::Event &e)
+			{"custom value", attach,
+				[this](const input::event &e)
 				{
-					pushAndShowNewCollectValueRangeInputView<int, 0, 8>(attachParams(), e, "Input 0 to 8", "",
-						[this](CollectTextInputView &, auto val)
+					pushandshownewcollectvaluerangeinputview<int, 0, 8>(attachparams(), e, "input 0 to 8", "",
+						[this](collecttextinputview &, auto val)
 						{
-							elem.buttonGroup()->setSpacing(val, window());
-							vCtrl.place();
-							space.setSelected(MenuId{val}, *this);
-							dismissPrevious();
+							elem.buttongroup()->setspacing(val, window());
+							vctrl.place();
+							space.setselected(menuid{val}, *this);
+							dismissprevious();
 							return true;
 						});
 					return false;
-				}, {.id = defaultMenuId}
+				}, {.id = defaultmenuid}
 			},
 		},
 		space
 		{
-			"Spacing", attach,
-			MenuId{elem.buttonGroup() ? elem.buttonGroup()->spacing() : 0},
+			"spacing", attach,
+			menuid{elem.buttongroup() ? elem.buttonGroup()->spacing() : 0},
 			spaceItems,
 			{
 				.onSetDisplayString = [this](auto, Gfx::Text& t)

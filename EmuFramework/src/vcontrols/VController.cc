@@ -693,7 +693,7 @@ static void readAlphaList(MapIO &io, std::vector<VControllerElement> &elems)
 	for(auto i : iotaCount(n))
 	{
 		auto pct = io.get<uint8_t>();
-		if(i < elems.size() && pct <= 200) elems[i].alphaPct = pct;
+		if(i < elems.size() && pct <= 100) elems[i].alphaPct = pct;
 	}
 }
 
