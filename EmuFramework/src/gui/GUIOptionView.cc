@@ -224,6 +224,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	menuOrientationItem
 	{
 		{"Auto",        	attach, {.id = Orientations{}}},
+		{"Auto (sensor)",       attach, {.id = Orientations::all{}}},
 		{landscapeName,  	attach, {.id = Orientations{.landscapeRight = 1}}},
 		{landscape2Name,	attach, {.id = Orientations{.landscapeLeft = 1}}},
 		{landscapeAutoName, 	attach, {.id = Orientations::allLandscape()}},
@@ -242,6 +243,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	emuOrientationItem
 	{
 		{"Auto",       		attach, {.id = Orientations{}}},
+		{"Auto (sensor)",       attach, {.id = Orientations::all{}}},
 		{landscapeName,  	attach, {.id = Orientations{.landscapeRight = 1}}},
 		{landscape2Name, 	attach, {.id = Orientations{.landscapeLeft = 1}}},
 		{landscapeAutoName, 	attach, {.id = Orientations::allLandscape()}},

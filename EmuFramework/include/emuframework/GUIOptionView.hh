@@ -53,9 +53,9 @@ protected:
 	BoolMenuItem showHiddenFiles;
 	DualTextMenuItem maxRecentContent;
 	TextHeadingMenuItem orientationHeading;
-	TextMenuItem menuOrientationItem[6];
+	TextMenuItem menuOrientationItem[7];
 	MultiChoiceMenuItem menuOrientation;
-	TextMenuItem emuOrientationItem[6];
+	TextMenuItem emuOrientationItem[7];
 	MultiChoiceMenuItem emuOrientation;
 	ConditionalMember<Config::TRANSLUCENT_SYSTEM_UI, BoolMenuItem> layoutBehindSystemUI;
 	ConditionalMember<Config::freeformWindows, TextMenuItem> setWindowSize;
