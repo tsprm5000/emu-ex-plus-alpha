@@ -311,8 +311,7 @@ bool loadVControllerLayout(EmuApp &app, VController &vc, int slot)
 		});
 	if(!loaded)
 		return false;
-	vc.place();
-	vc.applySavedButtonAlpha();
+	vc.applyLoadedLayout();
 	return true;
 }
 

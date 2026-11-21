@@ -876,6 +876,21 @@ void VController::writeLayoutConfig(FileIO &io) const
 	writeElementAlphasConfig(io);
 }
 
+void VController::applyLoadedLayout()
+{
+	if(!hasWindow())
+		return;
+	for(auto &e : gpElements)
+	{
+		update(e);
+		if(auto dpad = e.dPad())
+			dpad->updateBoundingAreaGfx(*renderer_);
+	}
+	for(auto &e : uiElements) { update(e); }
+	place();
+	applySavedButtonAlpha();
+}
+
 void VController::writeElementSizesConfig(FileIO &io) const
 {
 	writeSizeList(io, CFGKEY_VCONTROLLER_ELEMENT_SIZES, gpElements);

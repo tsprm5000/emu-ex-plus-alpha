@@ -590,6 +590,7 @@ public:
 	void place();
 	bool isPortraitLayout() const;
 	void writeLayoutConfig(FileIO &) const;
+	void applyLoadedLayout();
 	void toggleKeyboard();
 	bool pointerInputEvent(const Input::MotionEvent &, WindowRect gameRect);
 	bool keyInput(const Input::KeyEvent &);
